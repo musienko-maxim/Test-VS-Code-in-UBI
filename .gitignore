@@ -1,8 +1,6 @@
-.classpath
-.project
-.settings
-target
-.odo
-.idea
-.DS_Store
+__pycache__/
+*.py[cod]
+*$py.class
 
+.odo/env
+.odo/odo-file-index.json%
