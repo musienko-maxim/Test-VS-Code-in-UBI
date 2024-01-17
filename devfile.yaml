@@ -1,45 +1,25 @@
 schemaVersion: 2.2.0
 metadata:
-  name: dotnet-basic
-  displayName: Basic .NET
-  version: 1.1.1
-  icon: https://github.com/dotnet/brand/raw/main/logo/dotnet-logo.png
+  name: go
+  displayName: Go Runtime
+  description: 'Go is an open source programming language that makes it easy to build simple, reliable, and efficient software.'
+  icon: https://raw.githubusercontent.com/devfile-samples/devfile-stack-icons/main/golang.svg
+  language: Go
+  projectType: Go
+  tags:
+    - Go
+  version: 1.1.0
   provider: Red Hat
   supportUrl: https://github.com/devfile-samples/devfile-support#support-information
-  language: .NET
-  projectType: dotnet
-  tags:
-    - .NET
   attributes:
     alpha.dockerimage-port: 8081
-starterProjects:
-  - name: s2i-example
-    git:
-      checkoutFrom:
-        remote: origin
-        revision: dotnet-6.0
-      remotes:
-        origin: https://github.com/redhat-developer/s2i-dotnetcore-ex
-    subDir: app
+parent:
+  id: go
+  registryUrl: 'https://registry.devfile.io'
 components:
-  - name: dotnet
-    container:
-      image: registry.access.redhat.com/ubi8/dotnet-60:6.0
-      command: ['tail', '-f', '/dev/null']
-      mountSources: true
-      env:
-        - name: CONFIGURATION
-          value: Debug
-        - name: STARTUP_PROJECT
-          value: app.csproj
-        - name: ASPNETCORE_ENVIRONMENT
-          value: Development
-      endpoints:
-        - name: http-8080
-          targetPort: 8080
   - name: image-build
     image:
-      imageName: 'dotnet-image:latest'
+      imageName: go-image:latest
       dockerfile:
         uri: docker/Dockerfile
         buildContext: .
@@ -48,54 +28,26 @@ components:
     attributes:
       deployment/replicas: 1
       deployment/cpuRequest: 10m
-      deployment/memoryRequest: 100Mi
+      deployment/memoryRequest: 10Mi
       deployment/container-port: 8081
     kubernetes:
-      uri: kubernetes/deployment.yaml
+      uri: deploy.yaml
       endpoints:
-        - name: http-8081
-          targetPort: 8081
-          path: /
-  - name: kubernetes-service
-    attributes:
-      deployment/replicas: 1
-      deployment/cpuRequest: 10m
-      deployment/memoryRequest: 100Mi
-      deployment/container-port: 8081
-    kubernetes:
-      uri: kubernetes/service.yaml
+      - name: http-8081
+        targetPort: 8081
+        path: /
 commands:
-  - id: build
-    exec:
-      workingDir: ${PROJECT_SOURCE}
-      commandLine: kill $(pidof dotnet); dotnet build -c $CONFIGURATION $STARTUP_PROJECT /p:UseSharedCompilation=false
-      component: dotnet
-      group:
-        isDefault: true
-        kind: build
-  - id: run
-    exec:
-      workingDir: ${PROJECT_SOURCE}
-      commandLine: dotnet run -c $CONFIGURATION --no-build --project $STARTUP_PROJECT --no-launch-profile
-      component: dotnet
-      group:
-        isDefault: true
-        kind: run
   - id: build-image
     apply:
       component: image-build
-  - id: deploy-deployment
+  - id: deployk8s
     apply:
       component: kubernetes-deploy
-  - id: deploy-service
-    apply:
-      component: kubernetes-service
   - id: deploy
     composite:
       commands:
         - build-image
-        - deploy-deployment
-        - deploy-service
+        - deployk8s
       group:
-        isDefault: true
         kind: deploy
+        isDefault: true
