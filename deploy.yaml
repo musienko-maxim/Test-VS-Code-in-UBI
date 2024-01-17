@@ -1,33 +1,33 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: my-python
+  name: my-java-quarkus
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: python-app
+      app: java-quarkus-app
   template:
     metadata:
       labels:
-        app: python-app
+        app: java-quarkus-app
     spec:
       containers:
-        - name: my-python
-          image: python-image:latest
+        - name: my-java-quarkus
+          image: java-quarkus-image:latest
           ports:
             - name: http
               containerPort: 8081
               protocol: TCP
           resources:
             requests:
-              memory: "50Mi"
+              memory: "100Mi"
               cpu: "10m"
 ---
 kind: Service
 apiVersion: v1
 metadata:
-  name: my-python
+  name: my-java-quarkus-svc
 spec:
   ports:
     - name: http-8081
@@ -35,4 +35,4 @@ spec:
       protocol: TCP
       targetPort: 8081
   selector:
-    app: python-app
+    app: java-quarkus-app
