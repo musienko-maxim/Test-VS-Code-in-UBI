@@ -1,36 +1,36 @@
 schemaVersion: 2.2.0
 metadata:
-  name: java-quarkus
+  name: java-springboot
   version: 1.2.1
-  provider: Red Hat
-  supportUrl: https://github.com/devfile-samples/devfile-support#support-information
-  icon: https://design.jboss.org/quarkus/logo/final/SVG/quarkus_icon_rgb_default.svg
-  website: https://quarkus.io
-  displayName: Quarkus Java
-  description: Quarkus with Java
-  tags:
-    - Java
-    - Quarkus
-  projectType: Quarkus
-  language: Java
   attributes:
     alpha.dockerimage-port: 8081
+  displayName: Spring Boot®
+  description: Spring Boot® using Maven
+  icon: https://raw.githubusercontent.com/devfile-samples/devfile-stack-icons/main/spring.svg
+  tags:
+    - Java
+    - Spring
+  projectType: springboot
+  language: Java
+  provider: Red Hat
+  supportUrl: https://github.com/devfile-samples/devfile-support#support-information
 parent:
-  id: java-quarkus
+  id: java-springboot
   registryUrl: 'https://registry.devfile.io'
+  version: 1.2.0
 components:
   - name: image-build
     image:
-      imageName: java-quarkus-image:latest
+      imageName: java-springboot-image:latest
       dockerfile:
-        uri: src/main/docker/Dockerfile.jvm.staged
+        uri: docker/Dockerfile
         buildContext: .
         rootRequired: false
   - name: kubernetes-deploy
     attributes:
       deployment/replicas: 1
       deployment/cpuRequest: 10m
-      deployment/memoryRequest: 100Mi
+      deployment/memoryRequest: 180Mi
       deployment/container-port: 8081
     kubernetes:
       uri: deploy.yaml
