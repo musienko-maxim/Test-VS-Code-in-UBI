@@ -1,50 +1,101 @@
-schemaVersion: 2.1.0
+schemaVersion: 2.2.0
 metadata:
-  name: nodejs-angular
-  displayName: Angular
-  description: "Angular is a development platform, built on TypeScript. As a platform, Angular includes:
-    A component-based framework for building scalable web applications
-    A collection of well-integrated libraries that cover a wide variety of features, including routing, forms management, client-server communication, and more
-    A suite of developer tools to help you develop, build, test, and update your code"
-  icon: https://raw.githubusercontent.com/devfile-samples/devfile-stack-icons/main/angular.svg
-  tags:
-    - Node.js
-    - Angular
-  projectType: Angular
-  language: TypeScript
+  name: dotnet-basic
+  displayName: Basic .NET
+  version: 1.1.1
+  icon: https://github.com/dotnet/brand/raw/main/logo/dotnet-logo.png
   provider: Red Hat
-  version: 2.0.2
+  supportUrl: https://github.com/devfile-samples/devfile-support#support-information
+  language: .NET
+  projectType: dotnet
+  tags:
+    - .NET
+  attributes:
+    alpha.dockerimage-port: 8081
 starterProjects:
-  - name: nodejs-angular-starter
+  - name: s2i-example
     git:
       checkoutFrom:
-        revision: main
+        remote: origin
+        revision: dotnet-6.0
       remotes:
-        origin: https://github.com/devfile-samples/devfile-stack-nodejs-angular.git
+        origin: https://github.com/redhat-developer/s2i-dotnetcore-ex
+    subDir: app
 components:
-  - container:
+  - name: dotnet
+    container:
+      image: registry.access.redhat.com/ubi8/dotnet-60:6.0
+      command: ['tail', '-f', '/dev/null']
+      mountSources: true
+      env:
+        - name: CONFIGURATION
+          value: Debug
+        - name: STARTUP_PROJECT
+          value: app.csproj
+        - name: ASPNETCORE_ENVIRONMENT
+          value: Development
       endpoints:
-        - name: http-angular
-          targetPort: 4200
-      image: registry.access.redhat.com/ubi8/nodejs-16:1-139
-      args: ["tail", "-f", "/dev/null"]
-      memoryLimit: 1024Mi
-    name: runtime
+        - name: http-8080
+          targetPort: 8080
+  - name: image-build
+    image:
+      imageName: 'dotnet-image:latest'
+      dockerfile:
+        uri: docker/Dockerfile
+        buildContext: .
+        rootRequired: false
+  - name: kubernetes-deploy
+    attributes:
+      deployment/replicas: 1
+      deployment/cpuRequest: 10m
+      deployment/memoryRequest: 100Mi
+      deployment/container-port: 8081
+    kubernetes:
+      uri: kubernetes/deployment.yaml
+      endpoints:
+        - name: http-8081
+          targetPort: 8081
+          path: /
+  - name: kubernetes-service
+    attributes:
+      deployment/replicas: 1
+      deployment/cpuRequest: 10m
+      deployment/memoryRequest: 100Mi
+      deployment/container-port: 8081
+    kubernetes:
+      uri: kubernetes/service.yaml
 commands:
-  - exec:
-      commandLine: npm install
-      component: runtime
+  - id: build
+    exec:
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: kill $(pidof dotnet); dotnet build -c $CONFIGURATION $STARTUP_PROJECT /p:UseSharedCompilation=false
+      component: dotnet
       group:
         isDefault: true
         kind: build
+  - id: run
+    exec:
       workingDir: ${PROJECT_SOURCE}
-    id: install
-  - exec:
-      commandLine: npm run start
-      component: runtime
+      commandLine: dotnet run -c $CONFIGURATION --no-build --project $STARTUP_PROJECT --no-launch-profile
+      component: dotnet
       group:
         isDefault: true
         kind: run
-      hotReloadCapable: true
-      workingDir: ${PROJECT_SOURCE}
-    id: run
+  - id: build-image
+    apply:
+      component: image-build
+  - id: deploy-deployment
+    apply:
+      component: kubernetes-deploy
+  - id: deploy-service
+    apply:
+      component: kubernetes-service
+  - id: deploy
+    composite:
+      commands:
+        - build-image
+        - deploy-deployment
+        - deploy-service
+      group:
+        isDefault: true
+        kind: deploy
