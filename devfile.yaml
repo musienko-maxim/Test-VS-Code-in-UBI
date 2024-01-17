@@ -1,40 +1,38 @@
 schemaVersion: 2.2.0
 metadata:
-  name: go
-  displayName: Go Runtime
-  description: 'Go is an open source programming language that makes it easy to build simple, reliable, and efficient software.'
-  icon: https://raw.githubusercontent.com/devfile-samples/devfile-stack-icons/main/golang.svg
-  language: Go
-  projectType: Go
-  tags:
-    - Go
-  version: 1.1.0
+  name: nodejs
+  version: 3.0.0
+  displayName: Node.js Runtime
+  description: Stack with Node.js 18
+  tags: ["Node.js", "Express", "ubi8"]
+  projectType: "Node.js"
+  language: "JavaScript"
+  attributes:
+    alpha.dockerimage-port: 3001
   provider: Red Hat
   supportUrl: https://github.com/devfile-samples/devfile-support#support-information
-  attributes:
-    alpha.dockerimage-port: 8081
 parent:
-  id: go
-  registryUrl: 'https://registry.devfile.io'
+  id: nodejs
+  registryUrl: "https://registry.devfile.io"
 components:
   - name: image-build
     image:
-      imageName: go-image:latest
+      imageName: nodejs-image:latest
       dockerfile:
-        uri: docker/Dockerfile
+        uri: Dockerfile
         buildContext: .
         rootRequired: false
   - name: kubernetes-deploy
     attributes:
       deployment/replicas: 1
       deployment/cpuRequest: 10m
-      deployment/memoryRequest: 10Mi
-      deployment/container-port: 8081
+      deployment/memoryRequest: 50Mi
+      deployment/container-port: 3001
     kubernetes:
       uri: deploy.yaml
       endpoints:
-      - name: http-8081
-        targetPort: 8081
+      - name: http-3001
+        targetPort: 3001
         path: /
 commands:
   - id: build-image
