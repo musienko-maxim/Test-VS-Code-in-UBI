@@ -1,49 +1,67 @@
 schemaVersion: 2.1.0
 metadata:
-  name: nodejs-nextjs
-  displayName: Next.js
-  description: "Next.js gives you the best developer experience with all the features you need for production:
-    hybrid static & server rendering, TypeScript support, smart bundling, route pre-fetching, and more.
-    No config needed."
-  icon: https://raw.githubusercontent.com/devfile-samples/devfile-stack-icons/main/next-js.svg
+  name: nodejs
+  displayName: Node.js Runtime
+  description: Node.js 16 application
+  icon: https://nodejs.org/static/images/logos/nodejs-new-pantone-black.svg
   tags:
     - Node.js
-    - Next.js
-  projectType: Next.js
-  language: TypeScript
-  provider: Red Hat
-  version: 1.0.3
+    - Express
+    - ubi8
+  projectType: Node.js
+  language: JavaScript
+  version: 2.1.1
 starterProjects:
-  - name: nodejs-nextjs-starter
+  - name: nodejs-starter
     git:
-      checkoutFrom:
-        revision: main
       remotes:
-        origin: https://github.com/devfile-samples/devfile-stack-nodejs-nextjs.git
+        origin: 'https://github.com/odo-devfiles/nodejs-ex.git'
 components:
-  - container:
-      endpoints:
-        - name: http-nextjs
-          targetPort: 3000
-      image: registry.access.redhat.com/ubi8/nodejs-16:1-139
-      command: ['tail', '-f', '/dev/null']
+  - name: runtime
+    container:
+      image: registry.access.redhat.com/ubi8/nodejs-16:latest
+      args: ['tail', '-f', '/dev/null']
       memoryLimit: 1024Mi
-    name: runtime
+      mountSources: true
+      env:
+        - name: DEBUG_PORT
+          value: '5858'
+      endpoints:
+        - name: http-node
+          targetPort: 3000
+        - exposure: none
+          name: debug
+          targetPort: 5858
 commands:
-  - exec:
+  - id: install
+    exec:
+      component: runtime
       commandLine: npm install
-      component: runtime
+      workingDir: ${PROJECT_SOURCE}
       group:
-        isDefault: true
         kind: build
-      workingDir: ${PROJECT_SOURCE}
-    id: install
-  - exec:
-      commandLine: npm run dev
-      component: runtime
-      group:
         isDefault: true
-        kind: run
-      hotReloadCapable: true
+  - id: run
+    exec:
+      component: runtime
+      commandLine: npm start
       workingDir: ${PROJECT_SOURCE}
-    id: run
+      group:
+        kind: run
+        isDefault: true
+  - id: debug
+    exec:
+      component: runtime
+      commandLine: npm run debug
+      workingDir: ${PROJECT_SOURCE}
+      group:
+        kind: debug
+        isDefault: true
+  - id: test
+    exec:
+      component: runtime
+      commandLine: npm test
+      workingDir: ${PROJECT_SOURCE}
+      group:
+        kind: test
+        isDefault: true

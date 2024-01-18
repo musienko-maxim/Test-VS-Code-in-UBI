@@ -1,34 +1,24 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# nodejs-starter
 
-## Getting Started
+This is a sample starter project that provides you with a basic Express app and a sample test in a `/test` sub directory. This sample project uses `Express v4.17.x` and enables health checking and application metrics out of the box. You can override or enhance the following endpoints by configuring your own health checks in your application.
 
-First, run the development server:
+## Health checking
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+Health-checking enables the cloud platform to determine the `readiness` and `liveness` of your application.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+ These endpoints will be available for you to use:
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+- Readiness endpoint: http://localhost:3000/ready
+- Liveness endpoint: http://localhost:3000/live
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+## Application metrics
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+The [prom-client](https://www.npmjs.com/package/prom-client) module will collect a wide range of resource-centric (CPU, memory) and application-centric (HTTP request responsiveness) metrics from your application, and then expose them as multi-dimensional time-series data through an application endpoint for Prometheus to scrape and aggregate.
 
-## Learn More
+ This endpoints will be available for you to use:
 
-To learn more about Next.js, take a look at the following resources:
+- Metrics endpoint: http://localhost:3000/metrics
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+This stack is licensed under the [EPL 2.0](./LICENSE) license.
